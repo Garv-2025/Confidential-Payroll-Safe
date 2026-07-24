@@ -1,0 +1,12 @@
+# Dependencies & Build Artifacts
+node_modules/
+out/
+cache/
+
+# Python Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Environment Variables & Secrets
+.env
