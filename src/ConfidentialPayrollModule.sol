@@ -18,16 +18,20 @@ contract ConfidentialPayrollModule {
 
     // We store the encrypted handle pointing to the total payroll split rules
     bytes32 public payrollRulesHandle;
-
-    constructor(address _safeAccount) {
-        safeAccount = _safeAccount;
-    }
-
-    /// @notice Stores the encrypted rules for payroll
-    function setPayrollRules(bytes32 encryptedHandle) external {
-        // Nox will manage the ACL (Access Control List) for this encrypted handle
-        payrollRulesHandle = encryptedHandle;
-    }
+    address public employer;
+   constructor(address _safeAccount) {
+    employer = msg.sender;
+    safeAccount = _safeAccount; 
+}
+    modifier onlyEmployer() {
+    require(msg.sender == employer, "Unauthorized: Only Employer can execute");
+    _;
+}
+   /// @notice Stores the encrypted rules for payroll
+function setPayrollRules(bytes32 encryptedHandle) external onlyEmployer {
+    // Nox will manage the ACL (Access Control List) for this encrypted handle
+    payrollRulesHandle = encryptedHandle;
+}
 
     /// @notice Triggers the confidential Nox computation
     function withdrawEncryptedSalary(bytes32 userRequestHandle) external {

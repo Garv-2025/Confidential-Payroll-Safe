@@ -1,2 +1,3 @@
 @iexec-nox/=node_modules/@iexec-nox/
 @safe-global/=node_modules/@safe-global/
+encrypted-types/=node_modules/encrypted-types/
