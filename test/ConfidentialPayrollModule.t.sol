@@ -30,10 +30,10 @@ contract ConfidentialPayrollModuleTest is Test {
     function testFuzz_HackerCannotSetRules(address randomAddress) public {
         // Exclude legitimate actors and zero address
         vm.assume(randomAddress != employer && randomAddress != address(0));
-        
+
         vm.prank(randomAddress);
         vm.expectRevert("Unauthorized: Only Employer can execute");
-        
+
         payrollModule.setPayrollRules(bytes32("hacked_rules"));
     }
 }

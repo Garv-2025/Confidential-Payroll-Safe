@@ -26,7 +26,7 @@ contract ConfidentialPayrollModule {
     /// @notice Stores the encrypted rules for payroll
     function setPayrollRules(bytes32 encryptedHandle) external onlyEmployer {
         payrollRulesHandle = encryptedHandle;
-        
+
         emit PayrollRulesUpdated(msg.sender, encryptedHandle);
     }
 
@@ -35,7 +35,7 @@ contract ConfidentialPayrollModule {
         // 1. Nox SDK validates the handle proofs.
         // 2. An off-chain TEE computes if msg.sender is owed money.
         // 3. A callback triggers ISafe(safeAccount).execTransactionFromModule(...)
-        
+
         // Advanced smart contract concepts and security modifiers will be built here.
     }
 }
