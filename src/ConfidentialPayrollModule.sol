@@ -1,37 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import { Nox } from "@iexec-nox/nox-protocol-contracts/contracts/sdk/Nox.sol";
-import { Enum } from "@safe-global/safe-contracts/contracts/common/Enum.sol";
-
-interface ISafe {
-    function execTransactionFromModule(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Enum.Operation operation
-    ) external returns (bool success);
-}
+pragma solidity ^0.8.24;
 
 contract ConfidentialPayrollModule {
-    address public safeAccount;
+    // Declared immutable to optimize gas usage and enforce immutability
+    address public immutable employer;
+    address public immutable safeAccount;
 
-    // We store the encrypted handle pointing to the total payroll split rules
     bytes32 public payrollRulesHandle;
-    address public employer;
-   constructor(address _safeAccount) {
-    employer = msg.sender;
-    safeAccount = _safeAccount; 
-}
+
+    event PayrollRulesUpdated(address indexed employer, bytes32 encryptedHandle);
+
     modifier onlyEmployer() {
-    require(msg.sender == employer, "Unauthorized: Only Employer can execute");
-    _;
-}
-   /// @notice Stores the encrypted rules for payroll
-function setPayrollRules(bytes32 encryptedHandle) external onlyEmployer {
-    // Nox will manage the ACL (Access Control List) for this encrypted handle
-    payrollRulesHandle = encryptedHandle;
-}
+        require(msg.sender == employer, "Unauthorized: Only Employer can execute");
+        _;
+    }
+
+    constructor(address _safeAccount) {
+        // Zero-address validation
+        require(_safeAccount != address(0), "Invalid safe account address");
+
+        employer = msg.sender;
+        safeAccount = _safeAccount;
+    }
+
+    /// @notice Stores the encrypted rules for payroll
+    function setPayrollRules(bytes32 encryptedHandle) external onlyEmployer {
+        payrollRulesHandle = encryptedHandle;
+        
+        emit PayrollRulesUpdated(msg.sender, encryptedHandle);
+    }
 
     /// @notice Triggers the confidential Nox computation
     function withdrawEncryptedSalary(bytes32 userRequestHandle) external {

@@ -1,38 +1,39 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
-import "../src/ConfidentialPayrollModule.sol";
+import {Test} from "forge-std/Test.sol";
+import {ConfidentialPayrollModule} from "../src/ConfidentialPayrollModule.sol";
 
 contract ConfidentialPayrollModuleTest is Test {
     ConfidentialPayrollModule public payrollModule;
-    
-    // Create dummy addresses for testing
-    address employer = address(1);
-    address randomHacker = address(2);
-    address dummySafe = address(3);
+    address public employer = address(0x1);
+    address public safeAccount = address(0x2);
 
     function setUp() public {
-        // vm.prank simulates the 'employer' wallet deploying the contract
-        vm.prank(employer); 
-        payrollModule = new ConfidentialPayrollModule(dummySafe);
+        vm.prank(employer);
+        payrollModule = new ConfidentialPayrollModule(safeAccount);
     }
 
     function test_EmployerCanSetRules() public {
-        vm.prank(employer); // Act as the employer
-        payrollModule.setPayrollRules(bytes32("secret_rules"));
-        
-        // Check that the rules were successfully saved
-        assertEq(payrollModule.payrollRulesHandle(), bytes32("secret_rules"));
+        vm.prank(employer);
+        payrollModule.setPayrollRules(bytes32("rules_hash"));
+        assertEq(payrollModule.payrollRulesHandle(), bytes32("rules_hash"));
     }
 
     function test_HackerCannotSetRules() public {
-        vm.prank(randomHacker); // Act as a random unauthorized wallet
+        address hacker = address(0x3);
+        vm.prank(hacker);
+        vm.expectRevert("Unauthorized: Only Employer can execute");
+        payrollModule.setPayrollRules(bytes32("hacked_rules"));
+    }
+
+    function testFuzz_HackerCannotSetRules(address randomAddress) public {
+        // Exclude legitimate actors and zero address
+        vm.assume(randomAddress != employer && randomAddress != address(0));
         
-        // We tell Foundry to EXPECT this next transaction to fail with our exact error message
+        vm.prank(randomAddress);
         vm.expectRevert("Unauthorized: Only Employer can execute");
         
-        // The hacker tries to overwrite the rules
         payrollModule.setPayrollRules(bytes32("hacked_rules"));
     }
 }
