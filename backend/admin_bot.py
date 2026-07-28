@@ -10,9 +10,7 @@ private_key = os.getenv("PRIVATE_KEY")
 web3 = Web3(Web3.HTTPProvider(rpc_url))
 account = web3.eth.account.from_key(private_key)
 
-# KEEP OLD ADDRESS FOR NOW — DO NOT CHANGE YET
-CONTRACT_ADDRESS = web3.to_checksum_address("0xC198759A0b6dFFE4677AF788c00c1FF51D69F151")
-
+CONTRACT_ADDRESS = web3.to_checksum_address("0xc5407bDC504446B0d9A1D1Ca747C37738739387C")
 ABI = [
     {
         "inputs": [{"internalType": "bytes32", "name": "encryptedHandle", "type": "bytes32"}],
@@ -31,7 +29,6 @@ def update_rules():
     dummy_rules_hash = Web3.keccak(text="Hackathon_Payroll_Rules_v1")
     print(f"📦 Preparing to upload encrypted rules hash: {dummy_rules_hash.hex()}")
 
-    # 1. DYNAMIC NONCE: Use 'pending' to prevent transaction jams if run repeatedly
     nonce = web3.eth.get_transaction_count(account.address, 'pending')
     
     # 2. DYNAMIC GAS PRICING: Calculate gas based on live network block data
@@ -60,7 +57,7 @@ def update_rules():
     signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
     
     print("🚀 Sending to Sepolia Network...")
-    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
     
     print(f"⏳ Waiting for confirmation. Tx Hash: {web3.to_hex(tx_hash)}")
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
