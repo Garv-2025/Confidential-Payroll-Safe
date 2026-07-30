@@ -10,18 +10,23 @@ private_key = os.getenv("PRIVATE_KEY")
 web3 = Web3(Web3.HTTPProvider(rpc_url))
 account = web3.eth.account.from_key(private_key)
 
-CONTRACT_ADDRESS = web3.to_checksum_address("0xc5407bDC504446B0d9A1D1Ca747C37738739387C")
-ABI = [
-    {
-        "inputs": [{"internalType": "bytes32", "name": "encryptedHandle", "type": "bytes32"}],
-        "name": "setPayrollRules",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
+# 1. Configuration variables
+WSS_ENDPOINT = "wss://eth-sepolia.g.alchemy.com/v2/QLTONUdBiYcSZUgsDJZPv"
+CONTRACT_ADDRESS = "0x6D04A9Dc4AcDe7f658B8563D76f44D2ccF5748Ba"
+
+# 2. Your Extracted Contract ABI (Updated for the new contract)
+CONTRACT_ABI = [
+    {"type":"constructor","inputs":[{"name":"_safeAccount","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},
+    {"type":"function","name":"employer","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+    {"type":"function","name":"payrollRulesHandle","inputs":[],"outputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"stateMutability":"view"},
+    {"type":"function","name":"safeAccount","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+    {"type":"function","name":"setPayrollRules","inputs":[{"name":"encryptedHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+    {"type":"function","name":"withdrawEncryptedSalary","inputs":[{"name":"employee","type":"address","internalType":"address"},{"name":"amountOwed","type":"uint256","internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+    {"type":"event","name":"PayrollRulesUpdated","inputs":[{"name":"employer","type":"address","indexed":True,"internalType":"address"},{"name":"encryptedHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False},
+    {"type":"event","name":"SalaryPaid","inputs":[{"name":"employee","type":"address","indexed":True,"internalType":"address"},{"name":"amount","type":"uint256","indexed":False,"internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False}
 ]
 
-contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
+contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 
 def update_rules():
     print(f"🤖 Admin Wallet ({account.address}) connecting...")
