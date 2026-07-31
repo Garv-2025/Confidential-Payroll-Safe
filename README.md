@@ -1,51 +1,41 @@
-# PrivaPay Enterprise
+Confidential Payroll Safe
+Confidential B2B Web3 Payroll powered by iExec TEE and Ethereum Sepolia.
 
-**Confidential B2B Web3 Payroll powered by iExec TEE and Ethereum Sepolia.**
+The Problem
+Public blockchains are inherently transparent. While this is great for decentralized finance, it is a non-starter for enterprise B2B applications. Traditional on-chain payroll protocols expose salary data, contractor addresses, and corporate cash flow to the entire world.
 
-## The Problem
-Public blockchains are inherently transparent. While this is great for decentralized finance, it is a non-starter for enterprise B2B applications. Traditional on-chain payroll protocols expose salary data, contractor addresses, and corporate cash flow to the entire world. 
-
-## The Solution
-PrivaPay bridges the gap between Web3 settlement and Web2 privacy. By leveraging Trusted Execution Environments (TEE) via the iExec workercloud, PrivaPay encrypts payroll rules and executes salary distributions off-chain inside a secure Intel SGX enclave. 
+The Solution
+Confidential Payroll Safe bridges the gap between Web3 settlement and Web2 privacy. By leveraging Trusted Execution Environments (TEE) via the iExec workercloud, payroll rules are encrypted and salary distributions are executed off-chain inside a secure Intel SGX enclave.
 
 The result? Employees receive verifiable on-chain ETH payouts on Sepolia, while the corporate payroll logic and salary tiers remain strictly confidential.
 
----
+Architecture & Tech Stack
+This repository contains our hackathon MVP, built to demonstrate the core cryptographic flow and UX.
 
-## Architecture & Tech Stack
-This repository contains our hackathon MVP, built to demonstrate the core cryptographic flow and UX. 
+Smart Contracts: Solidity (Deployed on Ethereum Sepolia)
 
-* **Smart Contracts:** Solidity (Deployed on Ethereum Sepolia)
-* **Backend Logic:** Python & Web3.py for transaction building and network broadcasting.
-* **Frontend Interface:** Streamlit for rapid Python-based UI prototyping and enterprise dashboard simulation.
-* **Confidentiality Layer:** Designed around iExec TEE (Note: The current MVP simulates the enclave attestation delay for demonstration purposes).
+Backend Logic: Python & Web3.py for transaction building and network broadcasting
 
----
+Frontend Interface: Streamlit for rapid Python-based UI prototyping and dashboard simulation
 
-## How to Run Locally (For Judges)
-Follow these steps to run the enterprise dashboard on your local machine.
+Confidentiality Layer: Designed around iExec TEE
 
-### 1. Clone the Repository
-```bash
+How to Run Locally (For Judges)
+1. Clone the Repository
 git clone [https://github.com/Garv-2025/Confidential-Payroll-Safe.git](https://github.com/Garv-2025/Confidential-Payroll-Safe.git)
 cd Confidential-Payroll-Safe
 2. Set Up Virtual Environment & Dependencies
-Bash
 python -m venv venv
-source venv/Scripts/activate  # On Windows
-# source venv/bin/activate    # On Mac/Linux
-
+source venv/Scripts/activate
 pip install streamlit web3 python-dotenv pandas
 3. Environment Variables
 Create a file named .env in the root directory and add your Sepolia credentials:
 
-Plaintext
 RPC_URL="[https://eth-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_KEY](https://eth-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_KEY)"
 PRIVATE_KEY="your_wallet_private_key_here"
 4. Launch the Application
-Bash
 python -m streamlit run app.py
-The dashboard will automatically open in your browser at http://localhost:8501.
+The dashboard will open automatically in your browser at http://localhost:8501.
 
 Future Roadmap
 While this MVP successfully proves the confidential payout architecture, our immediate next steps for production scaling include:
