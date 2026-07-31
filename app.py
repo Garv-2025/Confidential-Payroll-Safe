@@ -14,6 +14,20 @@ st.set_page_config(
     layout="wide",
 )
 
+# --- Initialize Dynamic Session State ---
+if 'total_paid' not in st.session_state:
+    st.session_state.total_paid = 0.50
+if 'roster_count' not in st.session_state:
+    st.session_state.roster_count = 3
+if 'payout_history' not in st.session_state:
+    st.session_state.payout_history = pd.DataFrame({
+        "Date": ["2026-07-31", "2026-07-30", "2026-07-28"],
+        "Recipient": ["Robin Arryn (0x71C...8976F)", "Alex Mercer (0x123...abc)", "Elena Rostova (0x456...def)"],
+        "Amount ETH": [0.050, 0.150, 0.300],
+        "Department": ["Security", "Engineering", "Product"],
+        "Status": ["✅ Verified", "✅ Verified", "✅ Verified"]
+    })
+
 # --- Sidebar ---
 with st.sidebar:
     st.title("🛡️ Payroll Safe")
@@ -35,13 +49,8 @@ with st.sidebar:
 st.title("Confidential Payroll Safe")
 st.subheader("🛡️ iExec Confidential Computing Enabled")
 
-m1, m2, m3 = st.columns(3)
-with m1:
-    st.metric(label="Total Paid (All Time)", value="0.50 ETH")
-with m2:
-    st.metric(label="Active Payroll Roster", value="3 Contractors")
-with m3:
-    st.metric(label="Privacy Shield Status", value="100% Confidential")
+# Placeholder for top metrics (renders fresh data at the end of the script)
+metrics_placeholder = st.empty()
 
 st.divider()
 
@@ -71,7 +80,7 @@ with tab1:
             status = st.status("Initializing Confidential Payroll Environment...", expanded=True)
             
             try:
-                # 1. UI Simulation for Demo Polish
+                # 1. UI Simulation
                 status.write("🔐 Payload Encrypted. Connecting to iExec Workercloud...")
                 time.sleep(1.2)
                 status.write("🧠 Executing Logic inside TEE Enclave (Intel SGX)...")
@@ -122,7 +131,20 @@ with tab1:
                 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
                 tx_hash_hex = w3.to_hex(tx_hash)
 
-                # 3. Success State
+                # 3. Dynamic State Updates
+                st.session_state.total_paid += eth_amount
+                st.session_state.roster_count += 1
+                
+                # Append transaction to audit log table
+                new_entry = pd.DataFrame([{
+                    "Date": time.strftime("%Y-%m-%d"),
+                    "Recipient": f"{emp_name} ({emp_address_checksum[:6]}...{emp_address_checksum[-4:]})",
+                    "Amount ETH": eth_amount,
+                    "Department": dept,
+                    "Status": "✅ Verified"
+                }])
+                st.session_state.payout_history = pd.concat([new_entry, st.session_state.payout_history], ignore_index=True)
+
                 status.update(label="Payout Successfully Processed!", state="complete", expanded=False)
                 st.balloons()
                 st.success(f"Successfully processed {eth_amount} ETH payout to {emp_name} ({emp_address_checksum})")
@@ -135,17 +157,9 @@ with tab1:
 
 with tab2:
     st.subheader("Recent Payout History")
-    mock_data = {
-        "Date": ["2026-07-31", "2026-07-30", "2026-07-28", "2026-07-25", "2026-07-20"],
-        "Recipient": ["0x71C...8976F", "0x123...abc", "0x456...def", "0x789...ghi", "0xabc...123"],
-        "Amount ETH": [0.050, 0.150, 0.050, 0.200, 0.050],
-        "Department": ["Security", "Engineering", "Engineering", "Product", "Operations"],
-        "Status": ["✅ Verified", "✅ Verified", "✅ Verified", "✅ Verified", "✅ Verified"]
-    }
-    df = pd.DataFrame(mock_data)
     
     st.dataframe(
-        df, 
+        st.session_state.payout_history, 
         use_container_width=True, 
         hide_index=True,
         column_config={
@@ -155,10 +169,17 @@ with tab2:
     )
     st.download_button(
         label="Download Audit Report (CSV)", 
-        data=df.to_csv().encode('utf-8'), 
+        data=st.session_state.payout_history.to_csv().encode('utf-8'), 
         file_name='payroll_safe_audit.csv', 
         mime='text/csv'
     )
 
 st.divider()
 st.caption("Confidential Payroll Safe | Built for WTF Hackathon")
+
+# --- Render Dynamic Header Metrics ---
+with metrics_placeholder.container():
+    m1, m2, m3 = st.columns(3)
+    m1.metric(label="Total Paid (All Time)", value=f"{st.session_state.total_paid:.3f} ETH")
+    m2.metric(label="Active Payroll Roster", value=f"{st.session_state.roster_count} Contractors")
+    m3.metric(label="Privacy Shield Status", value="100% Confidential")
