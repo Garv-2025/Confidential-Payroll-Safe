@@ -68,6 +68,47 @@ def update_rules():
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     
     print(f"✅ Success! Rules updated in Block Number: {receipt.blockNumber}")
+def trigger_payout(employee_address, amount_in_wei, request_handle):
+    print(f"\n💸 Initiating secure payout for: {employee_address}")
+    
+    # 1. Build the transaction
+    tx = contract.functions.withdrawEncryptedSalary(
+        employee_address,
+        amount_in_wei,
+        request_handle
+    ).build_transaction({
+        'from': account.address,
+        'nonce': web3.eth.get_transaction_count(account.address),
+        'gas': 200000,
+        'gasPrice': web3.eth.gas_price
+    })
+
+    # 2. Sign and send the transaction
+    signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
+    print("✍️  Transaction signed by TEE Oracle (Admin). Broadcasting...")
+    
+    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    # 3. Wait for the blockchain to confirm
+    print(f"⏳ Waiting for confirmation... Hash: {tx_hash.hex()}")
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    
+    if receipt.status == 1:
+        print(f"✅ SUCCESS! Payout executed in block {receipt.blockNumber}")
+    else:
+        print("❌ Transaction failed.")
+
+# --- How to run it ---
+# You can test it by calling it at the bottom of your file like this:
+if __name__ == "__main__":
+    # update_rules() # Your previous test
+    
+    # Fake employee address and handle for testing
+    test_employee = "0xYourTestEmployeeWalletAddressHere"
+    test_amount = web3.to_wei(0.01, 'ether') # Paying 0.01 Sepolia ETH
+    test_handle = web3.to_bytes(text="test_request_handle_123").ljust(32, b'\0')
+    
+    # trigger_payout(test_employee, test_amount, test_handle)
 
 if __name__ == "__main__":
     update_rules()
