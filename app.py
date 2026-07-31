@@ -1,32 +1,26 @@
-import os
-import time
-import pandas as pd
 import streamlit as st
+import time
+import os
+import pandas as pd
 from web3 import Web3
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # --- Page Configuration ---
-st.set_page_config(
-    page_title="Confidential Payroll Safe",
-    page_icon="🛡️",
-    layout="wide",
-)
+st.set_page_config(page_title="Confidential Payroll Safe", page_icon="🛡️", layout="wide")
 
-# --- Initialize Dynamic Session State ---
-if 'total_paid' not in st.session_state:
-    st.session_state.total_paid = 0.50
-if 'roster_count' not in st.session_state:
-    st.session_state.roster_count = 3
+# --- Initialize Session State ---
 if 'payout_history' not in st.session_state:
-    st.session_state.payout_history = pd.DataFrame({
-        "Date": ["2026-07-31", "2026-07-30", "2026-07-28"],
-        "Recipient": ["Robin Arryn (0x71C...8976F)", "Alex Mercer (0x123...abc)", "Elena Rostova (0x456...def)"],
-        "Amount ETH": [0.050, 0.150, 0.300],
-        "Department": ["Security", "Engineering", "Product"],
-        "Status": ["✅ Verified", "✅ Verified", "✅ Verified"]
-    })
+    st.session_state.payout_history = pd.DataFrame(columns=["Date", "Recipient", "Amount ETH", "Department", "Status"])
+    # Seed data (4 entries matching 0.530 ETH total and 4 contractors)
+    st.session_state.payout_history.loc[len(st.session_state.payout_history)] = ["2026-07-28", "Elena Rostova (0x3A0...c79C8)", 0.035, "Marketing", "✅ Verified"]
+    st.session_state.payout_history.loc[len(st.session_state.payout_history)] = ["2026-07-25", "Alex Mercer (0x1C7...748Ba)", 0.045, "Engineering", "✅ Verified"]
+    st.session_state.payout_history.loc[len(st.session_state.payout_history)] = ["2026-07-21", "Sarah Chen (0x8B2...f93A1)", 0.050, "Product", "✅ Verified"]
+    st.session_state.payout_history.loc[len(st.session_state.payout_history)] = ["2026-07-15", "David Vance (0x9E4...a11B2)", 0.400, "Security", "✅ Verified"] 
+
+if 'total_paid' not in st.session_state:
+    st.session_state.total_paid = 0.530
+
+if 'roster_count' not in st.session_state:
+    st.session_state.roster_count = 4
 
 # --- Sidebar ---
 with st.sidebar:
@@ -35,7 +29,7 @@ with st.sidebar:
     st.divider()
     
     st.subheader("Platform Status")
-    st.success("🟢 TEE Workercloud Online")
+    st.info("🟢 TEE Workercloud Online") 
     
     st.subheader("Admin Wallet")
     st.code("0x71C7656EC7ab88b098defB751B7401B5f6d8976F", language="text")
@@ -48,10 +42,10 @@ with st.sidebar:
 # --- Main Header ---
 st.title("Confidential Payroll Safe")
 st.subheader("🛡️ iExec Confidential Computing Enabled")
+st.write("Securely process enterprise payroll on public blockchains. Leveraging iExec's Trusted Execution Environments (TEE), employee salaries, addresses, and smart contract execution logic remain completely private while settling on the Ethereum Sepolia testnet.")
 
-# Placeholder for top metrics (renders fresh data at the end of the script)
+# Placeholder for top metrics
 metrics_placeholder = st.empty()
-
 st.divider()
 
 # --- Tabs ---
@@ -135,7 +129,6 @@ with tab1:
                 st.session_state.total_paid += eth_amount
                 st.session_state.roster_count += 1
                 
-                # Append transaction to audit log table
                 new_entry = pd.DataFrame([{
                     "Date": time.strftime("%Y-%m-%d"),
                     "Recipient": f"{emp_name} ({emp_address_checksum[:6]}...{emp_address_checksum[-4:]})",
@@ -146,7 +139,6 @@ with tab1:
                 st.session_state.payout_history = pd.concat([new_entry, st.session_state.payout_history], ignore_index=True)
 
                 status.update(label="Payout Successfully Processed!", state="complete", expanded=False)
-                st.balloons()
                 st.success(f"Successfully processed {eth_amount} ETH payout to {emp_name} ({emp_address_checksum})")
                 
                 st.markdown(f"🔗 **[View Verified Transaction on Etherscan](https://sepolia.etherscan.io/tx/{tx_hash_hex})**")

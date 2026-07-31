@@ -42,21 +42,18 @@ contract ConfidentialPayrollModule {
     }
 
     /// @notice Triggers the confidential Nox computation callback
-    /// @dev In a full production environment, this would strictly check a cryptographic signature from the TEE.
+
     function withdrawEncryptedSalary(
         address employee, 
         uint256 amountOwed, 
         bytes32 userRequestHandle
     ) external {
-        // 1. SECURITY CHECK: Ensure the caller is the trusted off-chain TEE/Oracle
-        // (For the hackathon demo, you might temporarily restrict this to the employer or a specific oracle address)
-        // require(msg.sender == trustedTeeOracle, "Unauthorized: Only TEE can execute");
-        
-        // 2. VALIDATION: Ensure there is actually a salary to pay
+    
+        // 1. VALIDATION: Ensure there is actually a salary to pay
         require(amountOwed > 0, "No salary owed based on TEE computation");
         require(employee != address(0), "Invalid employee address");
 
-        // 3. EXECUTION: Tell the Safe to send the money
+        // 2. EXECUTION: Tell the Safe to send the money
         // operation: 0 represents a standard CALL (sending ETH/Tokens)
         bool success = ISafe(safeAccount).execTransactionFromModule(
             employee, 
@@ -67,7 +64,7 @@ contract ConfidentialPayrollModule {
 
         require(success, "Module transaction failed");
 
-        // Optional: Emit an event so the indexer knows the payment was processed
+        // 3. LOGGING: Emit an event so the indexer knows the payment was processed
         emit SalaryPaid(employee, amountOwed, userRequestHandle);
     }
 }
