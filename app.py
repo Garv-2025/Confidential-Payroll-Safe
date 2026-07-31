@@ -51,6 +51,7 @@ tab1, tab2 = st.tabs(["🚀 Execute Direct Payout", "📋 Payroll Audit Log"])
 with tab1:
     st.subheader("New Confidential Payout")
     
+    emp_name = st.text_input("Employee Name", placeholder="e.g. John Doe")
     emp_address = st.text_input("Employee Sepolia Address", placeholder="0x...")
     
     col_a, col_b = st.columns(2)
@@ -62,7 +63,9 @@ with tab1:
     st.write("") 
     
     if st.button("🔐 Execute Confidential Payout via iExec TEE", use_container_width=True, type="primary"):
-        if not emp_address or not emp_address.startswith("0x"):
+        if not emp_name:
+            st.error("Please provide an employee name.")
+        elif not emp_address or not emp_address.startswith("0x"):
             st.error("Please provide a valid Sepolia wallet address.")
         else:
             status = st.status("Initializing Confidential Payroll Environment...", expanded=True)
@@ -85,20 +88,20 @@ with tab1:
                 w3 = Web3(Web3.HTTPProvider(rpc_url))
                 account = w3.eth.account.from_key(private_key)
                 
-                # Your real deployed contract address
+                # Deployed contract address & address checksum validation
                 contract_address = w3.to_checksum_address("0x6D04A9Dc4AcDe7f658D8563D76f44D2ccf5748Ba")
-                emp_address = w3.to_checksum_address(emp_address)
+                emp_address_checksum = w3.to_checksum_address(emp_address)
                 
                 contract_abi = [
-    {"type":"constructor","inputs":[{"name":"_safeAccount","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},
-    {"type":"function","name":"employer","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
-    {"type":"function","name":"payrollRulesHandle","inputs":[],"outputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"stateMutability":"view"},
-    {"type":"function","name":"safeAccount","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
-    {"type":"function","name":"setPayrollRules","inputs":[{"name":"encryptedHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
-    {"type":"function","name":"withdrawEncryptedSalary","inputs":[{"name":"employee","type":"address","internalType":"address"},{"name":"amountOwed","type":"uint256","internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
-    {"type":"event","name":"PayrollRulesUpdated","inputs":[{"name":"employer","type":"address","indexed":True,"internalType":"address"},{"name":"encryptedHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False},
-    {"type":"event","name":"SalaryPaid","inputs":[{"name":"employee","type":"address","indexed":True,"internalType":"address"},{"name":"amount","type":"uint256","indexed":False,"internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False}
-]
+                    {"type":"constructor","inputs":[{"name":"_safeAccount","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},
+                    {"type":"function","name":"employer","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+                    {"type":"function","name":"payrollRulesHandle","inputs":[],"outputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"stateMutability":"view"},
+                    {"type":"function","name":"safeAccount","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
+                    {"type":"function","name":"setPayrollRules","inputs":[{"name":"encryptedHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+                    {"type":"function","name":"withdrawEncryptedSalary","inputs":[{"name":"employee","type":"address","internalType":"address"},{"name":"amountOwed","type":"uint256","internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","internalType":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+                    {"type":"event","name":"PayrollRulesUpdated","inputs":[{"name":"employer","type":"address","indexed":True,"internalType":"address"},{"name":"encryptedHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False},
+                    {"type":"event","name":"SalaryPaid","inputs":[{"name":"employee","type":"address","indexed":True,"internalType":"address"},{"name":"amount","type":"uint256","indexed":False,"internalType":"uint256"},{"name":"userRequestHandle","type":"bytes32","indexed":False,"internalType":"bytes32"}],"anonymous":False}
+                ]
                 
                 contract = w3.eth.contract(address=contract_address, abi=contract_abi)
                 amount_in_wei = w3.to_wei(eth_amount, 'ether')
@@ -107,9 +110,9 @@ with tab1:
                 # Dummy handle for hackathon demo
                 test_handle = b'demo_payroll'.ljust(32, b'\0') 
                 
-                # Calling YOUR specific function: withdrawEncryptedSalary
+                # Calling withdrawEncryptedSalary on Sepolia
                 payout_tx = contract.functions.withdrawEncryptedSalary(
-                    emp_address, amount_in_wei, test_handle
+                    emp_address_checksum, amount_in_wei, test_handle
                 ).build_transaction({
                     'chainId': 11155111, # Sepolia
                     'gas': 200000,
@@ -126,7 +129,7 @@ with tab1:
                 # 3. Success State
                 status.update(label="Payout Successfully Processed!", state="complete", expanded=False)
                 st.balloons()
-                st.success(f"Successfully processed {eth_amount} ETH payout to {emp_address}")
+                st.success(f"Successfully processed {eth_amount} ETH payout to {emp_name} ({emp_address_checksum})")
                 
                 st.markdown(f"🔗 **[View Verified Transaction on Etherscan](https://sepolia.etherscan.io/tx/{tx_hash_hex})**")
                 
