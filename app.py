@@ -87,7 +87,7 @@ with tab1:
                 time.sleep(1.2)
                 status.write("📡 Attestation Verified. Broadcasting signed transaction to Sepolia...")
                 
-                # 2. ACTUAL WEB3 BACKEND EXECUTION
+                # 2. WEB3 BACKEND EXECUTION
                 rpc_url = os.getenv("RPC_URL")
                 private_key = os.getenv("PRIVATE_KEY")
                 

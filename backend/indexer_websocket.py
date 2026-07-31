@@ -9,7 +9,7 @@ from web3.utils.subscriptions import LogsSubscription, LogsSubscriptionContext
 WSS_ENDPOINT = "wss://eth-sepolia.g.alchemy.com/v2/QLTONUdBiYcSZUgsDJZPv"
 CONTRACT_ADDRESS = "0x6D04A9Dc4AcDe7f658B8563D76f44D2ccF5748Ba"
 
-# 2. Your Extracted Contract ABI (Updated for the new contract)
+# 2. ABI
 CONTRACT_ABI = [
     {"type":"constructor","inputs":[{"name":"_safeAccount","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},
     {"type":"function","name":"employer","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},
@@ -37,7 +37,7 @@ async def log_handler(handler_context: LogsSubscriptionContext) -> None:
         print(f"▸ Employer        : {employer}")
         print(f"▸ Encrypted Handle: {handle}")
         
-        # --- SHOWMANSHIP: SIMULATING THE IEXEC SECURE ENCLAVE ---
+        #  IExec TEE Simulation
         print("\n🔒 Initializing iExec Trusted Execution Environment (TEE)...")
         time.sleep(1)
         print("⚙️  Running confidential off-chain computation...")
@@ -62,7 +62,7 @@ async def log_handler(handler_context: LogsSubscriptionContext) -> None:
             
         print("💾 Data written to mock_database.json!")
 
-        # --- THE WEBHOOK PUSH TO NODE.JS ---
+        # webhook
         webhook_url = "http://localhost:3000/api/webhook"
         payload = {
             "employer": employer,
