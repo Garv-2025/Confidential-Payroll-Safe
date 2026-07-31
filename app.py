@@ -9,14 +9,14 @@ load_dotenv()
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="PrivaPay Enterprise",
+    page_title="Confidential Payroll Safe",
     page_icon="🛡️",
     layout="wide",
 )
 
 # --- Sidebar ---
 with st.sidebar:
-    st.title("🛡️ PrivaPay")
+    st.title("🛡️ Payroll Safe")
     st.caption("Confidential iExec Payroll")
     st.divider()
     
@@ -32,7 +32,7 @@ with st.sidebar:
     st.info("iExec Confidential Computing is active. Payloads are encrypted.")
 
 # --- Main Header ---
-st.title("PrivaPay Enterprise")
+st.title("Confidential Payroll Safe")
 st.subheader("🛡️ iExec Confidential Computing Enabled")
 
 m1, m2, m3 = st.columns(3)
@@ -88,7 +88,6 @@ with tab1:
                 w3 = Web3(Web3.HTTPProvider(rpc_url))
                 account = w3.eth.account.from_key(private_key)
                 
-                # Deployed contract address & address checksum validation
                 contract_address = w3.to_checksum_address("0x6D04A9Dc4AcDe7f658D8563D76f44D2ccf5748Ba")
                 emp_address_checksum = w3.to_checksum_address(emp_address)
                 
@@ -107,21 +106,18 @@ with tab1:
                 amount_in_wei = w3.to_wei(eth_amount, 'ether')
                 nonce = w3.eth.get_transaction_count(account.address)
                 
-                # Dummy handle for hackathon demo
                 test_handle = b'demo_payroll'.ljust(32, b'\0') 
                 
-                # Calling withdrawEncryptedSalary on Sepolia
                 payout_tx = contract.functions.withdrawEncryptedSalary(
                     emp_address_checksum, amount_in_wei, test_handle
                 ).build_transaction({
-                    'chainId': 11155111, # Sepolia
+                    'chainId': 11155111,
                     'gas': 200000,
                     'maxFeePerGas': w3.to_wei('2', 'gwei'),
                     'maxPriorityFeePerGas': w3.to_wei('1', 'gwei'),
                     'nonce': nonce,
                 })
                 
-                # Sign and Broadcast
                 signed_tx = w3.eth.account.sign_transaction(payout_tx, private_key=private_key)
                 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
                 tx_hash_hex = w3.to_hex(tx_hash)
@@ -160,9 +156,9 @@ with tab2:
     st.download_button(
         label="Download Audit Report (CSV)", 
         data=df.to_csv().encode('utf-8'), 
-        file_name='privapay_audit.csv', 
+        file_name='payroll_safe_audit.csv', 
         mime='text/csv'
     )
 
 st.divider()
-st.caption("PrivaPay Enterprise | Built for WTF Hackathon")
+st.caption("Confidential Payroll Safe | Built for WTF Hackathon")
